@@ -5,6 +5,8 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.furb.rest.RestAPI.exception.InstituicaoNotFoundException;
 import com.furb.rest.RestAPI.model.Instituicao;
 import com.furb.rest.RestAPI.model.InstituicaoPut;
+import com.furb.rest.RestAPI.model.Obra;
 import com.furb.rest.RestAPI.repository.InstituicaoRepository;
 
 @RestController
@@ -24,6 +27,9 @@ public class InstituicaoController {
 
 	@Autowired
 	InstituicaoRepository instituicaoRepository;
+	
+	@Autowired
+	ObrasController obrasController;
 
 	/**
 	 * Consulta todas as instituições existentes
@@ -104,7 +110,19 @@ public class InstituicaoController {
 				.orElseThrow(() -> new InstituicaoNotFoundException(idInstituicao));
 
 		instituicaoRepository.delete(instituicao);
-
 		return ResponseEntity.ok().body("{\"success\":{\"text\":\"instituição removida\"}}");
+	}
+
+	@GetMapping("/instituicao/{id}/obras")
+	public ResponseEntity<?> getAllObras(@PathVariable(value = "id") Long idInstituicao)
+			throws InstituicaoNotFoundException {
+
+		List<Obra> listaObras = obrasController.getAllByInstitucao(idInstituicao);
+		
+		if (listaObras.isEmpty()) {
+			return ResponseEntity.ok().body("Não foi encontradas obras com o id de instituição: " + idInstituicao);
+		}
+		
+		return ResponseEntity.ok().body(listaObras);
 	}
 }

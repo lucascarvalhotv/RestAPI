@@ -15,6 +15,10 @@ public class Instituicao {
 	@NotBlank
 	private String entidade;
 
+	public Instituicao() {
+		super();
+	}
+	
 	public Instituicao(Long id, @NotBlank String nome, @NotBlank String entidade) {
 		super();
 		this.id = id;

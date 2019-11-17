@@ -7,7 +7,6 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,10 +16,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.furb.rest.RestAPI.exception.InstituicaoNotFoundException;
 import com.furb.rest.RestAPI.exception.ObrasNotFoundException;
+import com.furb.rest.RestAPI.model.Instituicao;
 import com.furb.rest.RestAPI.model.Obra;
 import com.furb.rest.RestAPI.model.ObraDelete;
+import com.furb.rest.RestAPI.model.ObraPost;
 import com.furb.rest.RestAPI.model.ObraPut;
+import com.furb.rest.RestAPI.repository.InstituicaoRepository;
 import com.furb.rest.RestAPI.repository.ObrasRepository;
 
 @RestController
@@ -28,6 +31,8 @@ public class ObrasController {
 
 	@Autowired
 	ObrasRepository obrasRepository;
+	@Autowired
+	InstituicaoController instituicaoController;
 
 	/**
 	 * Consulta todas as obras existentes
@@ -44,10 +49,23 @@ public class ObrasController {
 	 * 
 	 * @param obra dados da obra a ser criada
 	 * @return dados da obra criada em um arquivo JSON
+	 * @throws InstituicaoNotFoundException 
 	 */
 	@PostMapping("/obras")
-	public Obra createObra(@Valid @RequestBody Obra obra) {
-		return obrasRepository.save(obra);
+	public ResponseEntity<?> createObra(@Valid @RequestBody ObraPost obraPost) throws InstituicaoNotFoundException {
+		if (obraPost.getIdInstituicao() == null) {
+			return ResponseEntity.badRequest().body("É necessário informar o id da instituição");
+		}
+		
+		Instituicao instituicao = instituicaoController.getInstituicaoById(obraPost.getIdInstituicao());
+		
+		if (instituicao == null) {
+			return ResponseEntity.badRequest().body("Instituicao não encontrada com o id:" + obraPost.getIdInstituicao());
+		}
+		
+		Obra obra = new Obra(obraPost, instituicao);
+		
+		return ResponseEntity.ok().body(obrasRepository.save(obra));
 	}
 
 	/**
@@ -79,7 +97,9 @@ public class ObrasController {
 			throws ObrasNotFoundException {
 
 		Obra obra = obrasRepository.findById(obraId).orElseThrow(() -> new ObrasNotFoundException(obraId));
-
+		
+		System.out.println(obraDetails);
+		
 		if (obraDetails.getAutor() != null && !obraDetails.getAutor().isEmpty()) 
 			obra.setAutor(obraDetails.getAutor());
 		
@@ -144,5 +164,18 @@ public class ObrasController {
 		obrasRepository.deleteAll(obrasEncontradas);
 
 		return ResponseEntity.ok().body("{\"success\":{\"text\":\"obra(s) removida\"}}");
+	}
+	
+	public List<Obra> getAllByInstitucao(Long idInstituicao) {
+		Instituicao instituicao = new Instituicao();
+		instituicao.setId(idInstituicao);
+		
+		Obra obra = new Obra();
+		obra.setInstituicao(instituicao);
+		
+		Example<Obra> obraExample = Example.of(obra, ExampleMatcher.matchingAny());
+		List<Obra> obrasEncontradas = obrasRepository.findAll(obraExample);
+
+		return obrasEncontradas;
 	}
 }

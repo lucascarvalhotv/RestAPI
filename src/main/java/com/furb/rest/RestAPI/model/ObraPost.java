@@ -5,7 +5,7 @@ import javax.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "obras")
-public class Obra {
+public class ObraPost {
 
 	@Id
 	@GeneratedValue
@@ -28,16 +28,15 @@ public class Obra {
 	private String isbn;
 	@NotBlank
 	private String issn;
-	@ManyToOne
-	private Instituicao instituicao;
+	private Long idInstituicao;
 
-	public Obra() {
+	public ObraPost() {
 		super();
 	}
 
-	public Obra(Long id, @NotBlank String autor, @NotBlank String titulo, @NotBlank String ano,
+	public ObraPost(Long id, @NotBlank String autor, @NotBlank String titulo, @NotBlank String ano,
 			@NotBlank String edicao, @NotBlank String local, @NotBlank String editora, @NotBlank String paginas,
-			@NotBlank String isbn, @NotBlank String issn) {
+			@NotBlank String isbn, @NotBlank String issn, Long idInstituicao) {
 		super();
 		this.id = id;
 		this.autor = autor;
@@ -49,21 +48,7 @@ public class Obra {
 		this.paginas = paginas;
 		this.isbn = isbn;
 		this.issn = issn;
-	}
-	
-	public Obra(ObraPost obraPost, @NotBlank Instituicao instituicao) {
-		super();
-		this.id = obraPost.getId();
-		this.autor = obraPost.getAutor();
-		this.titulo = obraPost.getTitulo();
-		this.ano = obraPost.getAno();
-		this.edicao = obraPost.getEdicao();
-		this.local = obraPost.getLocal();
-		this.editora = obraPost.getEditora();
-		this.paginas = obraPost.getPaginas();
-		this.isbn = obraPost.getIsbn();
-		this.issn = obraPost.getIssn();
-		this.instituicao = instituicao;
+		this.idInstituicao = idInstituicao;
 	}
 
 	public Long getId() {
@@ -146,12 +131,12 @@ public class Obra {
 		this.issn = issn;
 	}
 
-	public Instituicao getInstituicao() {
-		return instituicao;
+	public Long getIdInstituicao() {
+		return idInstituicao;
 	}
 
-	public void setInstituicao(Instituicao instituicao) {
-		this.instituicao = instituicao;
-	}
+	public void setIdInstituicao(Long idInstituicao) {
+		this.idInstituicao = idInstituicao;
+	}	
 
 }

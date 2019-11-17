@@ -13,6 +13,10 @@ public class InstituicaoPut {
 	private String nome;
 	private String entidade;
 
+	public InstituicaoPut() {
+		super();
+	};
+	
 	public InstituicaoPut(Long id, @NotBlank String nome, @NotBlank String entidade) {
 		super();
 		this.id = id;
